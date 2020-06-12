@@ -25,12 +25,16 @@ io.on('connection', (client) => {
         // Emito la lista de usuarios conectados a una sala incluyendo el q ingresa, para el front end
         client.broadcast.to(data.sala).emit('listaPersonas', usuarios.getPersonasPorSala(data.sala));
 
+        // Mando al front end el usuario que acaba de entrar
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Admin', `${ data.nombre } entró`));
+
+
         // Cada vez q se cree 1 usuario, mostrar el array de todos los usuarios
         callback(usuarios.getPersonasPorSala(data.sala));
     });
 
     // Servidor pendiente cuando envíen mensajes para mandarlos al front end
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
         // Obtengo los datos del client para no tener q colocar el nombre cada vez q envío 1 mensaje
         let persona = usuarios.getPersona(client.id);
 
@@ -38,7 +42,9 @@ io.on('connection', (client) => {
         let mensaje = crearMensaje(persona.nombre, data.mensaje);
 
         // Envío el mensaje solo a los usuarios q estén en la misma sala
-        client.broadcast.to(data.sala).emit('crearMensaje', mensaje);
+        client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+        callback(mensaje);
     });
 
     client.on('mensajePrivado', data => {

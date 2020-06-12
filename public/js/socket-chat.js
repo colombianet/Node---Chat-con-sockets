@@ -20,6 +20,7 @@ socket.on('connect', function() {
     console.log('Conectado al servidor');
     socket.emit('entrarChat', usuario, function(resp) {
         console.log(resp);
+        renderizarUsuarios(resp);
     });
 });
 
@@ -37,12 +38,13 @@ socket.on('disconnect', function() {
 
 // Escuchar información
 socket.on('crearMensaje', (mensaje) => {
-    console.log('Servidor:', mensaje);
+    renderizarMensajes(mensaje, false);
+    scrollBottom();
 });
 
 // Escucho cada vez q 1 usuario entra o sale del chat para devolver el total de conectados
 socket.on('listaPersonas', (mensaje) => {
-    console.log(mensaje);
+    renderizarUsuarios(mensaje);
 });
 
 socket.on('mensajePrivado', mensaje => {
